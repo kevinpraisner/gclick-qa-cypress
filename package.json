@@ -1,0 +1,25 @@
+{
+  "name": "projeto-autom",
+  "version": "1.0.0",
+  "description": "1. [Parte 1: Estratégia, BDD e Testes Manuais (Visão de Produto)](#parte-1-estratégia-bdd-e-testes-manuais-visão-de-produto)\r    - [Cenário BDD (Gherkin)](#cenário-bdd-gherkin)\r    - [Testes Exploratórios / Edge Cases](#testes-exploratórios--edge-cases)\r 2. [Parte 2: Automação (Engenharia de Código)](#parte-2-automação-engenharia-de-código)\r    - [Pré-requisitos](#pré-requisitos)\r    - [Instalação](#instalação)\r    - [Como Executar os Testes](#como-executar-os-testes)\r    - [Estrutura do Projeto](#estrutura-do-projeto)\r 3. [Parte 3: Bug Report](#parte-3-bug-report)\r    - [Tickets Oficiais (Padrão Jira)](#tickets-oficiais-padrão-jira)\r    - [🔍 Menções Honrosas (Sessão Exploratória)](#-menções-honrosas-sessão-exploratória)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kevinpraisner/gclick-qa-cypress.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/kevinpraisner/gclick-qa-cypress/issues"
+  },
+  "homepage": "https://github.com/kevinpraisner/gclick-qa-cypress#readme",
+  "devDependencies": {
+    "@faker-js/faker": "^10.4.0",
+    "cypress": "^15.15.0"
+  }
+}
