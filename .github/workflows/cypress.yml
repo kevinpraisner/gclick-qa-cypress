@@ -1,0 +1,21 @@
+name: Cypress E2E & API Tests
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+jobs:
+  cypress-run:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do Repositório
+        uses: actions/checkout@v4
+
+      - name: Instalar Dependências e Rodar Testes
+        uses: cypress-io/github-action@v6
+        with:
+          command: npx cypress run
