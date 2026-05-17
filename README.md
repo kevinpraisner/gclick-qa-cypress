@@ -20,7 +20,7 @@
 O fluxo escolhido foi o **"Place Order: Register while Checkout"**. A escrita abaixo prioriza a linguagem de negócio e o valor do produto, evitando descrições muito imperativas de cliques e focando no comportamento esperado do sistema.
 
 ```
-
+```gherkin
 Funcionalidade: Checkout e Registro de Usuário Integrado
   Como um cliente do e-commerce
   Quero poder me registrar durante o processo de finalização de compra
