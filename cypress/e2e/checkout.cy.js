@@ -1,33 +1,43 @@
 import { faker } from '@faker-js/faker';
 
+// Gerando massa de dados dinâmica
+const userData = {
+  name: faker.person.fullName(),
+  email: faker.internet.email(),
+  password: faker.internet.password(),
+  firstName: faker.person.firstName(),
+  lastName: faker.person.lastName(),
+  address: faker.location.streetAddress(),
+  state: faker.location.state(),
+  city: faker.location.city(),
+  zipcode: faker.location.zipCode(),
+  mobile: faker.string.numeric(11) 
+};
+
 describe('Fluxo de Compra E2E - Automation Exercise', () => {
+
+  beforeEach(() => {
+    cy.visit('https://automationexercise.com/');
+  });
+
   it('Deve finalizar uma compra com registro de novo usuário no checkout', () => {
-    // Gerando massa de dados dinâmica
-    const userData = {
-      name: faker.person.fullName(),
-      email: faker.internet.email(),
-      password: faker.internet.password(),
-      firstName: faker.person.firstName(),
-      lastName: faker.person.lastName(),
-      address: faker.location.streetAddress(),
-      state: faker.location.state(),
-      city: faker.location.city(),
-      zipcode: faker.location.zipCode(),
-      mobile: faker.phone.number()
-    };
 
     // 1. Acessar o site e adicionar 2 produtos diferentes no carrinho
-    cy.visit('https://automationexercise.com/');
-    
-    // Adicionando o primeiro produto
+
+    // Captura o nome do primeiro produto quebrando o vínculo com o DOM
     cy.get('.features_items .col-sm-4').eq(0).within(() => {
-      // Usando force:true para o Bug dos Ads
-      cy.contains('Add to cart').click({ force: true }); 
+      cy.get('p').first().invoke('text').then((textoDoProduto) => {
+        cy.wrap(textoDoProduto).as('product1Name'); 
+      });
+      cy.contains('Add to cart').click({ force: true });
     });
     cy.contains('Continue Shopping').should('be.visible').click();
 
-    // Adicionando o segundo produto
+    // Captura o nome do segundo produto quebrando o vínculo com o DOM
     cy.get('.features_items .col-sm-4').eq(1).within(() => {
+      cy.get('p').first().invoke('text').then((textoDoProduto) => {
+        cy.wrap(textoDoProduto).as('product2Name');
+      });
       cy.contains('Add to cart').click({ force: true });
     });
     cy.contains('Continue Shopping').should('be.visible').click();
@@ -35,10 +45,10 @@ describe('Fluxo de Compra E2E - Automation Exercise', () => {
     // 2. Prosseguir para o checkout e realizar o registro dinâmico do usuário
     cy.get('.shop-menu').contains('Cart').click();
     cy.contains('Proceed To Checkout').click();
-    
+
     // Modal está visível
     cy.get('#checkoutModal').should('be.visible');
-    
+
     // Correção: Busca a tag "a" (link) que tenha o destino exato "/login" dentro do modal
     cy.get('#checkoutModal a[href="/login"]').click({ force: true });
 
@@ -77,9 +87,14 @@ describe('Fluxo de Compra E2E - Automation Exercise', () => {
     // 3. Validar se os produtos corretos estão na tela de revisão do carrinho
     cy.get('.shop-menu').contains('Cart').click();
     cy.contains('Proceed To Checkout').click();
-    
-    cy.get('#cart_info').should('contain', 'Blue Top');
-    cy.get('#cart_info').should('contain', 'Men Tshirt');
+
+    // Aliases criados dinamicamente para validar os produtos corretos
+    cy.get('@product1Name').then((name) => {
+      cy.get('#cart_info').should('contain', name);
+    });
+    cy.get('@product2Name').then((name) => {
+      cy.get('#cart_info').should('contain', name);
+    });
 
     // Inserir comentário e confirmar pedido
     cy.get('textarea[name="message"]').type('Por favor, entregar em horário comercial.');
@@ -89,13 +104,17 @@ describe('Fluxo de Compra E2E - Automation Exercise', () => {
     cy.get('[data-qa="name-on-card"]').type(userData.name);
     cy.get('[data-qa="card-number"]').type(faker.finance.creditCardNumber('####-####-####-####'));
     // Usando um CVC estático simples pois a API aceita qualquer coisa (referencia ao Bug 4 que achei)
-    cy.get('[data-qa="cvc"]').type('123'); 
+    cy.get('[data-qa="cvc"]').type('123');
     cy.get('[data-qa="expiry-month"]').type('12');
     cy.get('[data-qa="expiry-year"]').type('2030');
     cy.get('[data-qa="pay-button"]').click();
 
-    // Validação final de sucesso 
+    // Validação final de sucesso
     cy.get('[data-qa="order-placed"]').should('be.visible');
     cy.contains('Congratulations! Your order has been confirmed!').should('be.visible');
+
+    // Limpeza pós-teste: remove a conta criada para não poluir o ambiente
+    cy.get('.shop-menu').contains('Delete Account').click();
+    cy.get('[data-qa="account-deleted"]').should('be.visible');
   });
 });
