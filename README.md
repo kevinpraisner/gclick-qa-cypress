@@ -37,7 +37,6 @@ Funcionalidade: Checkout e Registro de Usuário Integrado
     E a nova conta do usuário deve constar como ativa e registrada no sistema
 
 
-```gherkin
 Cenário: Tentativa de finalizar compra com carrinho vazio
   Dado que o cliente não adicionou nenhum produto ao carrinho de compras
   Quando ele tenta prosseguir diretamente para a etapa de checkout
@@ -143,17 +142,15 @@ gclick-qa-cypress/
 
 ###  Cobertura dos Testes
 
-#### `api.cy.js` — Testes de API
-- **GET /productsList** → valida status HTTP 200 e o contrato do schema de resposta
-  (campos obrigatórios: `id`, `name`, `price`, `category`)
-- **POST /createAccount** → cria um novo usuário com dados dinâmicos gerados via
-  `@faker-js/faker` e valida o `responseCode 201` retornado pela API
+####  `api.cy.js` — Testes de API (Contrato, Negócio e Resiliência)
+- **GET /productsList (Status & Contrato)** → Valida o status HTTP 200 e aplica **Guard Clauses** (`length.greaterThan(0)`) antes de validar a tipagem estrita do schema de resposta (`number`, `string`, `object`), garantindo a integridade de estruturas aninhadas como `category.usertype`.
+- **POST /createAccount (Fluxo Positivo & Teardown)** → Cria um usuário dinâmico via payload `form-urlencoded` utilizando `@faker-js/faker`. Ao final da asserção do `responseCode 201`, realiza a limpeza automatizada do ambiente (**Teardown**) disparando um `DELETE /deleteAccount` para manter a idempotência do banco de dados.
+- **POST /createAccount (Cenário Negativo - E-mail Duplicado)** → Valida a regra de negócio do sistema disparando requisições consecutivas com a mesma massa de dados. Utiliza `{ failOnStatusCode: false }` para interceptar e validar o `responseCode 400` com a mensagem exata de erro: *"Email already exists!"*, seguido do fluxo de limpeza.
 
-#### `checkout.cy.js` — Teste E2E de UI
-- Acessa o site e adiciona 2 produtos distintos ao carrinho
-- Prossegue para o checkout e realiza o registro dinâmico de um novo usuário
-- Valida se os produtos corretos aparecem na tela de revisão do pedido
-- Preenche os dados de pagamento e confirma a mensagem de sucesso da compra
+####  `checkout.cy.js` — Teste E2E de UI (Ponta a Ponta)
+- **Captura Dinâmica do DOM (Anti-Flaky)** → Interage com a listagem de produtos e utiliza comandos de extração de texto para salvar o nome exato dos itens em memória através de **Aliases do Cypress** (`@product1Name` e `@product2Name`). Isso elimina dados fixos (*hardcoded*) e impede que o teste quebre caso a ordem ou o inventário da loja mudem.
+- **Resiliência contra Condições de Corrida (Race Conditions)** → Implementa validações explícitas de visibilidade de modais (`#checkoutModal`) e localização de elementos diretamente por atributos nativos de navegação (`a[href="/login"]`), contornando overlays visuais e lentidões severas causadas por scripts externos de publicidade (Google Ads).
+- **Fluxo Transacional Completo** → Adiciona produtos, avança para o checkout, realiza o cadastro com 11 dígitos limpos no telefone (evitando quebras de máscara), valida a persistência dos produtos dinâmicos no carrinho, simula o checkout de pagamento e conclui com o encerramento do ciclo de vida do teste, executando o clique em **Delete Account** para purgar o usuário de teste.
 
 ---
 
@@ -254,6 +251,6 @@ Para demonstrar um processo completo de investigação de qualidade indo além d
 
 * **1. Nome ausente no carrossel "Recommended Items":** Na página principal, ao rolar até a seção de itens recomendados, o terceiro card de produto apresenta uma falha de layout grave onde a tag que deveria conter o nome do produto renderiza uma cópia duplicada do preço (exibindo `<h2>Rs. 1000</h2>` seguido de um texto avulso `Rs. 1000`), ocultando completamente a identidade do item para o usuário final.
 * **2. Checkout e Pagamento aceitam qualquer dado de cartão fictício:** O formulário final da rota de pagamento não executa validações de regras de negócio complexas ou máscaras no back-end para o cartão de crédito. É possível preencher números sequenciais óbvios (ex: `1234 5678 ...`), CVC inválido (`000`) ou datas de validade expiradas no passado, e a aplicação prossegue autorizando o pedido com uma mensagem de sucesso falso, evidenciando uma falha grave de simulação de sandbox ou validação de contratos de gateway.
-* **3. Google Ads sobrepondo elementos interativos em viewports reduzidos:** O site renderiza anúncios dinâmicos do Google Ads que, dependendo da resolução de tela configurada no navegador (ex: viewports de automação padrão como 1024x768), cobrem fisicamente botões importantes como `Add to cart` ou `View Product`. Isso causa erros intermitentes do tipo `ElementClickInterceptedException`, exigindo a implementação de boas práticas de contorno de engenharia, como o uso do parâmetro `{ force: true }` no clique do Cypress para forçar a interação do elemento ocultado pelo iframe do anúncio.
+* **3. Google Ads sobrepondo elementos interativos em viewports reduzidos:** O site renderiza anúncios dinâmicos do Google Ads que, dependendo da resolução de tela configurada no navegador (ex: viewports de automação padrão como 1024x768), cobrem fisicamente botões importantes como `Add to cart` ou `View Product`. Isso causa erros intermitentes do tipo `ElementClickInterceptedException`, exigindo a implementação de boas práticas de contorno de engenharia, como o uso do parâmetro `{ force: true }`, a[href="/login"] para buscar direto no DOM e timeout: 10000 para URL, no clique do Cypress para forçar a interação do elemento ocultado pelo iframe do anúncio.
 
 ---

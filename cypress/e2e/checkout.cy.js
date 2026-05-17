@@ -56,7 +56,7 @@ describe('Fluxo de Compra E2E - Automation Exercise', () => {
     cy.url({ timeout: 10000 }).should('include', '/login');
 
     // Formulário inicial de Signup
-    // Mudança 3: Esticamos o tempo limite para 10 segundos apenas neste elemento para compensar o carregamento dos ads
+    // Mudança 3: Esticamos o tempo limite para 10 segundos apenas neste elemento para compensar o carregamento dos ads (Bug no menções honrosas)
     cy.get('.signup-form', { timeout: 10000 }).should('be.visible').within(() => {
       cy.get('input[name="name"]').type(userData.name);
       cy.get('input[name="email"]').type(userData.email);
