@@ -86,8 +86,8 @@ O projeto de automação foi construído utilizando **Cypress**, cobrindo tanto 
 
 1. Clone este repositório:
 ```bash
-git clone https://github.com/kevinpraisner/gclick-qa-cypress.git
-cd gclick-qa-cypress
+git clone https://github.com/kevinpraisner/automation-qa-cypress.git
+cd automation-qa-cypress
 
 ```
 
@@ -126,7 +126,7 @@ npx cypress run
 A arquitetura segue boas práticas de engenharia de software e manutenibilidade:
 
 ```text
-gclick-qa-cypress/
+automation-qa-cypress/
 ├── cypress/
 │   ├── e2e/
 │   │   ├── api.cy.js          # Automação de API (GET Schema e POST Dinâmico)
